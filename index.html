@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mail Agent - Hub</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class='bx bx-hive logo-icon'></i>
+                <span class="logo-text">Neural Bot</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-group-title">MENÚ PRINCIPAL</div>
+                <ul class="nav-list">
+                    <li class="nav-item active">
+                        <a href="#" class="nav-link" id="nav-btn-home">
+                            <i class='bx bx-envelope'></i>
+                            <span>Mail Agent</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link disabled" title="Próximamente">
+                            <i class='bx bx-data'></i>
+                            <span>Base de Conocimiento</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn-primary full-width" onclick="localStorage.clear(); location.reload();">
+                    <i class='bx bx-trash'></i> Restablecer Local
+                </button>
+                <div class="system-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">SYSTEM ONLINE API</span>
+                    <span class="status-latency" id="groq-latency">-ms</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">Workspace</span>
+                    <i class='bx bx-chevron-right'></i>
+                    <span class="breadcrumb-item active" id="breadcrumb-text">Mail Agent (Perfiles)</span>
+                </div>
+                
+                <div class="topbar-actions">
+                    <div id="auth-unlogged">
+                        <button class="btn-secondary" id="btn-open-login">
+                            <i class='bx bx-user'></i> Iniciar Sesión / Registro
+                        </button>
+                    </div>
+                    <div id="auth-logged" style="display:none; align-items:center; gap: 1rem;">
+                        <span id="auth-user-email" style="font-size: 0.85rem; color: var(--text-muted);">correo@...</span>
+                        <div class="user-profile glow-border-cyan" style="border-radius:50%;">
+                            <img src="" id="auth-avatar" alt="User" class="avatar" style="border:none;">
+                        </div>
+                        <i class='bx bx-log-out' id="btn-logout" style="cursor:pointer; color:var(--danger); font-size: 1.2rem;"></i>
+                    </div>
+                </div>
+            </header>
+
+            <section class="dashboard-area">
+                <!-- VISTA 1: Lista de Negocios -->
+                <div id="view-list">
+                    <div class="section-header">
+                        <h1 class="page-title">Mail Agent</h1>
+                        <p class="page-subtitle">Panel de control de Negocios conectados.</p>
+                    </div>
+
+                    <div class="workflows-section">
+                        <div class="section-title-row">
+                            <h2>Perfiles de Negocios Activos</h2>
+                            <button class="btn-primary" id="btn-create-profile">
+                                <i class='bx bx-plus'></i> NUEVO PERFIL
+                            </button>
+                        </div>
+                        
+                        <div class="cards-grid" id="profiles-grid"></div>
+                    </div>
+                </div>
+
+                <!-- VISTA 2: Detalle interno del Negocio (GESTIONAR) -->
+                <div id="view-detail" style="display: none;">
+                    
+                    <div class="detail-header">
+                        <button class="icon-btn-text" id="btn-back-to-list">
+                            <i class='bx bx-arrow-back'></i> Volver
+                        </button>
+                        <div class="detail-title">
+                            <i class='bx bx-briefcase' style="font-size: 2rem; color: var(--primary);"></i>
+                            <div>
+                                <h2 id="detail-business-name">Nombre</h2>
+                                <span class="card-id" id="detail-business-email">email@...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tabs-nav glow-border-cyan">
+                        <button class="tab-btn active" data-tab="tab-funciones"><i class='bx bx-network-chart'></i> Funciones</button>
+                        <button class="tab-btn" data-tab="tab-personas"><i class='bx bx-group'></i> Personas</button>
+                        <button class="tab-btn" data-tab="tab-registro"><i class='bx bx-terminal'></i> Registro</button>
+                    </div>
+
+                    <div class="tab-content-area">
+                        <!-- TAB FUNCIONES -->
+                        <div class="tab-pane active" id="tab-funciones">
+                            <div class="section-title-row">
+                                <h2>Nodos de Automatización</h2>
+                                <button class="btn-primary" id="btn-add-function"><i class='bx bx-plus'></i> NUEVA FUNCIÓN</button>
+                            </div>
+                            <div class="cards-grid" id="functions-grid"></div>
+                        </div>
+
+                        <!-- TAB PERSONAS -->
+                        <div class="tab-pane" id="tab-personas">
+                            <div class="section-title-row">
+                                <h2>Base de Datos de Contactos</h2>
+                                <div class="action-buttons">
+                                    <button class="btn-secondary" id="btn-select-all-people"><i class='bx bx-check-square'></i> Sel. Todo</button>
+                                    <button class="btn-danger tooltip-container" id="btn-delete-people">
+                                        <i class='bx bx-trash'></i> Eliminar
+                                        <span class="tooltip">Doble clic para confirmar</span>
+                                    </button>
+                                    <button class="btn-primary" id="btn-add-person"><i class='bx bx-user-plus'></i> Añadir</button>
+                                </div>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr><th width="50"></th><th>Cuenta de Correo (Email)</th><th>Estado</th><th>Fecha Añadido</th></tr>
+                                    </thead>
+                                    <tbody id="people-table-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- TAB REGISTRO -->
+                        <div class="tab-pane" id="tab-registro">
+                            <div class="section-title-row">
+                                <h2>Historial Neural (Logs)</h2>
+                                <div class="action-buttons">
+                                    <button class="btn-secondary" id="btn-select-all-logs"><i class='bx bx-check-square'></i> Sel. Todo</button>
+                                    <button class="btn-danger tooltip-container" id="btn-delete-logs">
+                                        <i class='bx bx-trash'></i> Eliminar
+                                        <span class="tooltip">Doble clic para confirmar</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="table-container terminal-style">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr><th width="50"></th><th>Timestamp</th><th>Acción</th><th>Destinatario</th><th>Result</th></tr>
+                                    </thead>
+                                    <tbody id="logs-table-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL: Auth / Login -->
+    <div class="modal-overlay" id="auth-modal">
+        <div class="modal-content glow-border-cyan">
+            <div class="modal-header">
+                <h2>Conexión a Supabase</h2>
+                <i class='bx bx-x close-modal' data-target="auth-modal"></i>
+            </div>
+            <div class="modal-body">
+                <p class="modal-desc">Simulación de registro/login.</p>
+                <div class="form-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" id="auth-email" placeholder="ej: usuario@gmail.com">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="auth-pass" placeholder="******">
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <span id="auth-error" style="color:var(--danger); font-size: 0.8rem;"></span>
+                <div style="display:flex; gap:1rem;">
+                    <button class="btn-secondary" id="btn-auth-register">Registrarse</button>
+                    <button class="btn-primary" id="btn-auth-login">Entrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Nuevo Negocio -->
+    <div class="modal-overlay" id="profile-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Crear Entorno de Negocio</h2>
+                <i class='bx bx-x close-modal' data-target="profile-modal"></i>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nombre del Negocio / Cliente</label>
+                    <input type="text" id="business-name" placeholder="Ej: Tienda de Plantas">
+                </div>
+                <div class="form-group">
+                    <label>Descripción del Negocio</label>
+                    <textarea id="business-description" rows="3" placeholder="Descripción breve para dar contexto a la IA..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Cuenta de correo conectada</label>
+                    <input type="email" id="business-email" placeholder="ej: envios@tienda.com">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary close-modal" data-target="profile-modal">Cancelar</button>
+                <button class="btn-primary" id="btn-save-profile">Crear Entorno</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Añadir Personas -->
+    <div class="modal-overlay" id="people-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Importar Contactos</h2>
+                <i class='bx bx-x close-modal' data-target="people-modal"></i>
+            </div>
+            <div class="modal-body">
+                <p class="modal-desc">Pega los correos electrónicos, separados por comas o saltos de línea.</p>
+                <div class="form-group">
+                    <textarea id="people-text" rows="6" placeholder="cliente1@gmail.com, cliente2@hotmail.com..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="btn-save-people">Importar a Base de Datos</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: IA GROQ ASISTENTE -->
+    <div class="modal-overlay" id="function-modal">
+        <div class="modal-content glow-border-cyan" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>Creador Neural con GROQ</h2>
+                <i class='bx bx-x close-modal' data-target="function-modal"></i>
+            </div>
+            
+            <div class="modal-body" id="func-body-main">
+                <div class="form-group">
+                    <label>Nombre de la Función</label>
+                    <input type="text" id="func-name" placeholder="Ej: Promo Verano">
+                </div>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label>Tipo de Operación</label>
+                    <select id="func-type" style="background:var(--bg-base); color:white; border:1px solid var(--border-color); padding:0.5rem; border-radius:5px;">
+                        <option value="enviar">ENVIAR CORREOS</option>
+                        <option value="responder">RESPONDER CORREOS</option>
+                    </select>
+                </div>
+
+                <!-- Chat interactivo con Groq -->
+                <div class="onboarding-chat" style="height: 350px; margin-top: 1rem;">
+                    <div class="chat-messages" id="groq-chat-messages" style="flex:1; padding:1rem; overflow-y:auto; display:flex; flex-direction:column; gap:0.5rem; font-size:0.85rem;">
+                        <div class="chat-msg msg-bot">Hola, soy el motor <strong>Groq API</strong>. Cuéntame qué tipo de correo necesitas configurar y crearé un borrador perfecto para ti usando la descripción de tu negocio.</div>
+                    </div>
+                    <div class="chat-input-area" style="display:flex; padding:0.5rem; background:var(--bg-base); border-top:1px solid var(--border-color);">
+                        <input type="text" id="groq-chat-input" placeholder="Dile a Groq lo que necesitas..." style="flex:1; background:none; border:none; color:white; outline:none; font-size:0.85rem; padding:0.5rem;">
+                        <button class="btn-execute" id="btn-send-groq" style="padding: 0.5rem 1rem; border-radius: 4px; font-size:0.85rem;"><i class='bx bx-send'></i></button>
+                    </div>
+                </div>
+
+                <!-- Selector de Destinatarios (Personas) SOLO para ENVIAR -->
+                <div id="func-recipients-area" style="margin-top: 1.5rem; display:none;">
+                    <label style="font-size: 0.85rem; color: var(--text-muted); display:block; margin-bottom:0.5rem;">Cargar destinatarios (Extraídos de tu pestaña 'Personas')</label>
+                    <div id="func-recipients-list" style="max-height: 100px; overflow-y:auto; border: 1px solid var(--border-color); padding: 0.5rem; border-radius:6px; background:var(--bg-base); font-size:0.85rem;">
+                        <!-- Checkboxes inyectados por JS -->
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn-primary" id="btn-save-function-final">Guardar Función <i class='bx bx-check'></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+</body>
+</html>
