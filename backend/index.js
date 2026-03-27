@@ -33,6 +33,40 @@ app.get('/api/run', async (req, res) => {
     }
 });
 
+// Endpoint proxy para Groq API
+app.post('/api/chat', async (req, res) => {
+    try {
+        const { messages, model, temperature } = req.body;
+        if (!process.env.GROQ_API_KEY) {
+            return res.status(500).json({ error: "Missing GROQ_API_KEY in backend" });
+        }
+        
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: { 
+                'Authorization': `Bearer ${process.env.GROQ_API_KEY}`, 
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ 
+                messages: messages || [], 
+                model: model || 'llama3-8b-8192', 
+                temperature: temperature || 0.7 
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.text();
+            throw new Error(`Groq API error: ${response.status} ${errorData}`);
+        }
+        
+        const data = await response.json();
+        res.json(data);
+    } catch (e) {
+        console.error("Error en /api/chat:", e.message);
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // === EL MOTOR PRINCIPAL ===
 async function processEmails() {
     console.log(`[${new Date().toLocaleTimeString()}] Escaneando Base de Datos buscando Funciones 'ACTIVO'...`);

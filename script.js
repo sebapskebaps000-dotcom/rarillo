@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtbGdmZnB5dmVzYXhoY2twaWN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NTc0MTMsImV4cCI6MjA5MDEzMzQxM30.NFitZB6eUea7T4taIt8kygaRMh8gvM0nNJx1HQB3eF0";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const GROQ_API_KEY = "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";
     
+
     // Auth State
     let currentUser = null;
     let currentBusinessId = null;
@@ -418,9 +418,10 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('groq-latency').textContent = "procesando...";
             const start = Date.now();
             
-            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            // Llamada al backend proxy
+            const response = await fetch('http://localhost:3000/api/chat', {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ messages: groqHistory, model: 'llama3-8b-8192', temperature: 0.7 })
             });
             const data = await response.json();
@@ -438,7 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
             _addGroqChat(aiText, 'bot');
         } catch(e) {
             groqChat.removeChild(typ);
-            _addGroqChat("Error de Red API Groq. Verifica credenciales.", 'bot');
+            _addGroqChat("Error de Red. Verifica el backend local.", 'bot');
         }
         
         groqInput.disabled = false;
