@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="card-info"><h3>${f.name}</h3></div>
                 <div class="card-desc" style="white-space: pre-wrap; font-family: var(--font-mono); font-size:0.75rem;">${f.prompt.substring(0,250)}...</div>
-                ${isEnviar && f.recipients && f.recipients.length ? \`<div style="margin-top:0.5rem; font-size:0.75rem; color:var(--primary);">🎯 Destinatarios guardados: \${f.recipients.length}</div>\` : ''}
+                ${isEnviar && f.recipients && f.recipients.length ? '<div style="margin-top:0.5rem; font-size:0.75rem; color:var(--primary);">🎯 Destinatarios guardados: ' + f.recipients.length + '</div>' : ''}
             `;
             functionsGrid.appendChild(card);
         });
